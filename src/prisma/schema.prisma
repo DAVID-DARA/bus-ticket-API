@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,52 +11,83 @@ datasource db {
 }
 
 model User {
-  id             String   @id @default(uuid()) // Unique identifier for the user, generated as a UUID
-  username       String   @unique // Unique username for the user
-  email          String   @unique // Unique email for the user
-  password       String   // Hashed password for authentication
-  createdAt      DateTime @default(now()) // Date of account creation
-  updatedAt      DateTime @updatedAt // Date of last account update
-
-  // Relations
-  tickets        Ticket[] // One-to-many relation with Ticket
-  auditLogs      AuditLog[] // One-to-many relation with AuditLog
-  account        Account? // One-to-one relation with Account
+  id                String        @id @default(uuid())
+  firstName         String
+  lastName          String
+  email             String        @unique
+  password          String
+  role              String        @default("USER")
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  transactions      Transaction[]
+  sentTransfers     Transfer[]    @relation("SentTransfers")
+  receivedTransfers Transfer[]    @relation("ReceivedTransfers")
+  auditLogs         AuditLog[]
+  accounts          Account[]
+  userTickets       UserTicket[]
 }
 
 model Ticket {
-  id          String   @id @default(uuid()) // Unique identifier for the ticket, generated as a UUID
-  userId      String   // ID of the user who owns the ticket
-  busNumber   String   // Bus number for the ticket
-  seatNumber  String   // Assigned seat number
-  price       Float    // Price of the ticket
-  status      String   // Status of the ticket (e.g., "booked", "canceled")
-  createdAt   DateTime @default(now()) // Date when the ticket was created
-  updatedAt   DateTime @updatedAt // Date when the ticket was last updated
+  id        String   @id @default(uuid())
+  routeId   String
+  price     Float
+  available Int
+  createdAt DateTime @default(now())
+  route     Route    @relation(fields: [routeId], references: [id])
+  userTickets UserTicket[]
+}
 
-  // Relations
-  user        User     @relation(fields: [userId], references: [id]) // Relate to the User model
+model UserTicket {
+  id        String   @id @default(uuid())
+  userId    String
+  ticketId  String
+  status    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  ticket    Ticket   @relation(fields: [ticketId], references: [id])
+}
+
+model Route {
+  id          String   @id @default(uuid())
+  origin      String
+  destination String
+  departureTime DateTime
+  arrivalTime DateTime
+  price       Float
+  tickets     Ticket[]
 }
 
 model Account {
-  id          String   @id @default(uuid()) // Unique identifier for the account, generated as a UUID
-  userId      String   @unique // Mark userId as unique for one-to-one relation
-  balance     Float    @default(0) // Current balance in the account
-  createdAt   DateTime @default(now()) // Date when the account was created
-  updatedAt   DateTime @updatedAt // Date when the account was last updated
+  id      String @id @default(uuid())
+  userId  String @unique
+  user    User   @relation(fields: [userId], references: [id])
+  balance Float  @default(0)
+}
 
-  // Relations
-  user        User     @relation(fields: [userId], references: [id]) // Relate to the User model
+model Transaction {
+  id        String   @id @default(uuid())
+  type      String
+  amount    Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model Transfer {
+  id          String   @id @default(uuid())
+  senderId    String
+  sender      User     @relation("SentTransfers", fields: [senderId], references: [id])
+  recipientId String
+  recipient   User     @relation("ReceivedTransfers", fields: [recipientId], references: [id])
+  amount      Float
+  createdAt   DateTime @default(now())
 }
 
 model AuditLog {
-  id        String   @id @default(uuid()) // Unique identifier for the log entry, generated as a UUID
-  userId    String   // ID of the user who performed the action
-  action    String   // Description of the action taken
-  timestamp DateTime @default(now()) // Date and time of the action
-  details   String?  // Additional details about the action
-  ipAddress String?  // IP address of the user (optional)
-
-  // Relations
-  user      User     @relation(fields: [userId], references: [id]) // Relate to the User model
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  createdAt DateTime @default(now())
 }

@@ -78,14 +78,14 @@ Ensure you have the following installed:
 - The API documentation is provided using Postman. You can import the Postman Collection located in the repository to explore and test the API endpoints.
 
 **Available Endpoints**
-- POST /api/auth/signup: Register a new user.
-- POST /api/auth/login: Login a user and obtain a JWT token.
-- POST /api/tickets/create: Create a bus ticket ID for the user.
-- POST /api/tickets/credit: Credit a bus ticket account.
-- POST /api/tickets/pay: Pay for a bus ticket.
-- GET /api/account/balance: View current account balance.
-- GET /api/transactions: View transaction history.
-- POST /api/account/transfer: Transfer credits to another user.
+- POST /api/v1/auth/signup: Register a new user.
+- POST /api/v1/auth/login: Login a user and obtain a JWT token.
+- POST /api/v1/tickets/create: Create a bus ticket ID for the user.
+- POST /api/v1/tickets/credit: Credit a bus ticket account.
+- POST /api/v1/tickets/pay: Pay for a bus ticket.
+- GET /api/v1/account/balance: View current account balance.
+- GET /api/v1/transactions: View transaction history.
+- POST /api/v1/account/transfer: Transfer credits to another user.
  
 **Docker**
 - You can run the application inside a Docker container for production:
